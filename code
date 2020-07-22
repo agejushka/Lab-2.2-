@@ -1,0 +1,243 @@
+
+#include <iostream>
+#include <iterator>
+#include <sstream>
+#include <string>
+#include <math.h>
+#include <fstream>
+#include <map>
+#include <vector>
+#include <algorithm>
+
+
+using namespace std; 
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+	typedef vector<int> Vector;
+	typedef multimap<string, vector<int> > maps;
+	maps mapfile;
+	ifstream file("semestr.txt");
+	Vector vec;
+	string name, s;
+	int n;
+
+	//Вектор для пар
+	Vector lessons;
+	lessons.clear();
+
+	if (file.is_open())
+	{
+		while (file >> name)
+		{
+			getline(file, s);
+			istringstream iss(s);
+			vec.clear();
+			while (iss >> n)
+			{
+				vec.push_back(n);
+				// Вектор со всеми парами
+				lessons.push_back(n);
+			}
+			mapfile.insert(make_pair(name, vec));
+		}
+	}
+
+
+	 for (maps::const_iterator it = mapfile.begin(); it != mapfile.end(); ++it) 
+    {
+		 std::cout << (*it).first << " ";
+        for (int i = 0; i < vec.size(); i++)
+        {
+            Vector::iterator iter = vec.begin();
+            advance(iter, i);
+            vec = it->second;
+			std::cout <<"|"<<vec[i]  <<"|"<< " ";
+        }
+		std::cout << endl;
+    }
+
+
+	 //Среднее количесвто пар в день
+	 cout << "\n";
+	 int sr = 0;
+	 for (maps::const_iterator it = mapfile.begin(); it != mapfile.end(); ++it)
+	 {
+		 for (int i = 0; i < vec.size(); i++)
+		 {
+			 Vector::iterator iter = vec.begin();
+			 advance(iter, i);
+			 vec = it->second;
+			
+			 for (int j=0; j < vec.size(); j++) 
+			 {
+				 sr =sr+vec[j];
+			 }
+			 int b = vec.size();
+			 sr = sr / (b+1);
+		 }
+		 std::cout <<" Average number of lessons on  "<< (*it).first << " "<<sr << " "<< endl;
+	 }
+     
+
+	//Дни с максимальным и минимальным количеством пар 
+	 Vector minimal;
+	 Vector maximal;
+	 for (maps::const_iterator it = mapfile.begin(); it != mapfile.end(); ++it)
+	 {
+		 int max = vec[0];
+		 int min = vec[0];
+		 for (int i = 0; i < vec.size(); i++)
+		 {
+			 Vector::iterator iter = vec.begin();
+			 advance(iter, i);
+			 vec = it->second;
+			
+			 for (int j = 0; j < vec.size(); j++)
+			 {
+				 if (vec[j] > max)
+				 {
+					 max = vec[j];
+				 }
+				 if (vec[j] < min)
+				 {
+					 min = vec[j];
+				 }
+			 }
+			 
+		 }
+		 minimal.push_back(min);
+		 maximal.push_back(max);
+	 }
+
+	 int minElementIndex = std::min_element(minimal.begin(), minimal.end()) - minimal.begin();
+	 maps::const_iterator it1 = mapfile.begin();
+	advance(it1, minElementIndex);
+	std::cout <<"\n  Day with the minimum number of lessons is "<< it1->first << " " << endl;
+
+	 int maxElementIndex = std::max_element(maximal.begin(), maximal.end()) - maximal.begin();
+	 maps::const_iterator it2 = mapfile.begin();
+	 advance(it2, maxElementIndex);
+	 std::cout <<"  Day with the maximum number of lessons is "<< it2->first << "\n" << endl;
+
+// пользователь указывает номер месяца и число с которого начинается отсчет 
+	 cout << "Enter the day and month of the first Monday " << endl;
+	 cout << "Enter the month number  ";
+	 int month;
+	 cin >> month;
+	 cout <<"Enter the day number    ";
+	 int day;
+	 cin >> day;
+	 
+
+// Создание map с календрем 
+			 maps mapcalendar;
+			 ifstream cfile("calendar.txt");
+			 Vector Veccalendar;
+			 string name1, ss;
+			 int nn;
+			 if (cfile.is_open())
+			 {
+				 while (cfile >> name1)
+				 {
+					 getline(cfile, ss);
+					 istringstream isss(ss);
+					 Veccalendar.clear();
+					 while (isss >> nn)
+					 Veccalendar.push_back(nn);
+					 mapcalendar.insert(make_pair(name1, Veccalendar));
+				 }
+			 }
+
+
+ //Создаем map число+пары
+	multimap <int, int> daylesson;
+	daylesson.clear();
+	multimap <int, int>::iterator itdaylesson = daylesson.begin();
+	
+
+
+	//Итератор для пар 
+	vector <int>::iterator itlessons;
+	//Переставляем итератор в начало вектора
+	itlessons = lessons.begin();
+
+
+//Выводим календарь с раписанием
+
+
+			 maps::const_iterator itq = mapcalendar.begin();
+			 advance(itq, (month-1) );
+			 int q=(day - 1);
+
+			 int nday = 0;
+			 int nlessons = 0;
+
+			 for (maps::const_iterator it = mapfile.begin(); it != mapfile.end(); ++it)
+				 {
+				
+					 Vector::iterator iterq = Veccalendar.begin();
+					 advance(iterq, q);
+					 Veccalendar = itq->second;
+
+					 std::cout << "            |"; 
+					 if (Veccalendar[q] < 10) { std::cout << "0"; };
+					 std::cout << Veccalendar[q] << "|   |";
+					 if (Veccalendar[q+7] < 10) { std::cout << "0"; };
+					 std::cout << Veccalendar[q + 7] << "|   |";
+					 if (Veccalendar[q + 14] < 10) { std::cout << "0"; };
+					 std::cout << Veccalendar[q + 14] << "|   |";
+					 if (Veccalendar[q + 21] < 10) { std::cout << "0"; };
+					 std::cout << Veccalendar[q + 21] << "|" << endl;
+
+					 std::cout << (*it).first << " ";
+					 for (int i = 0; i < vec.size(); i++)
+						 {
+							 Vector::iterator iter = vec.begin();
+							 advance(iter, i);
+							 vec = it->second;
+							 std::cout << "| " << vec[i] << "|  " << " ";
+						 }
+
+					     std::cout << endl;
+						 std::cout << endl;
+						 q = q + 1;
+				 } 
+
+
+			 for (q = (day - 1); q < (day - 1) + 6; q++)
+			 {
+				 Vector::iterator iterq = Veccalendar.begin();
+				 advance(iterq, q);
+				 Veccalendar = itq->second;
+				 int b = q;
+
+				 for (q; q < (b + 22); q += 7)
+				 {
+					 nlessons = (*itlessons);
+					 nday = Veccalendar[q];
+					 daylesson.insert(make_pair(nday, nlessons));
+					 advance(itlessons, 1);
+				 }
+				 q = b;
+			 }
+
+
+
+// Количество пар в определенный день 
+			 cout <<"Enter the day (from the calendar) on which you want to find out the number of lessons "<<endl;
+			 int theday;
+			 cin >> theday;
+			 std::cout << "On the "  << theday <<" there will be "<< daylesson.find(theday)->second <<" lessons" <<endl;
+
+
+		 std::system("pause");
+		 return 0;
+	 }
+
+
+
+	
+
+	
